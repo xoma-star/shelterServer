@@ -4,7 +4,7 @@ class Server {
     constructor() {
         let port = process.env.PORT || 5500
         console.log('listening on port ' + port)
-        this.server = new WebSocketServer({port: port})
+        this.server = new WebSocketServer({port: 5500})
         this.clients = {}
         this.server.on('connection', ws => {
             let clientId = this.generateRoomNumber()
