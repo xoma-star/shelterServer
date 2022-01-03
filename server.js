@@ -118,7 +118,7 @@ class Server {
 
 new Server()
 
-// const removeFromRooms = (message, ws) => {
+// const removeFromRooms = (message, ws) => {d
 //     let roomIndex = rooms.findIndex(v => v.id === message.data.roomId)
 //     let players = rooms[roomIndex].players
 //     let i = players.findIndex(v => v.id === message.data.userId)
