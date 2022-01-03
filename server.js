@@ -53,7 +53,7 @@ class Server {
         this.deletePlayerFromRoom(data.userId, data.roomId)
     }
     getRandomFromArray(array){
-        return array[this.generateRandom(0, array.length)]
+        return array[this.generateRandom(0, array.length-1)]
     }
     deletePlayerFromRoom(id, roomId){
         let roomIndex = this.rooms.findIndex(x => x.id === roomId)
