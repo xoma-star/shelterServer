@@ -2,7 +2,7 @@ import {WebSocketServer} from "ws";
 
 class Server {
     constructor() {
-        this.server = new WebSocketServer({port: 5000})
+        this.server = new WebSocketServer({port: process.env.PORT || 5500})
         this.clients = {}
         this.server.on('connection', ws => {
             let clientId = this.generateRoomNumber()
