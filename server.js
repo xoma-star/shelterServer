@@ -1,9 +1,9 @@
 import {WebSocketServer} from "ws";
+import {distresses, shelterLocations, shelterNames} from "./meta.js";
 
 class Server {
     constructor() {
         let port = process.env.PORT || 5500
-        console.log('listening on port ' + port)
         this.server = new WebSocketServer({port: port})
         this.clients = {}
         this.server.on('connection', ws => {
@@ -38,10 +38,22 @@ class Server {
             if(message.type === 'createRoom') this.createRoom(message.data)
             if(message.type === 'connectRoom') this.connectRoom(message.data)
             if(message.type === 'disconnectRoom') this.disconnectRoom(message.data)
+            if(message.type === 'startRoom') this.startRoom(message.data)
         })
+    }
+    startRoom(data){
+        let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        let willSurvive = Math.floor(room.players.length * room.willSurvivePercents / 100)
+        let distress = this.getRandomFromArray(distresses)
+        let shelterName = this.getRandomFromArray(shelterNames)
+        let shelterLocation = this.getRandomFromArray(shelterLocations)
+        this.broadcast(room.id, {distress, shelterName, shelterLocation, willSurvive})
     }
     disconnectRoom(data){
         this.deletePlayerFromRoom(data.userId, data.roomId)
+    }
+    getRandomFromArray(array){
+        return array[this.generateRandom(0, array.length)]
     }
     deletePlayerFromRoom(id, roomId){
         let roomIndex = this.rooms.findIndex(x => x.id === roomId)
