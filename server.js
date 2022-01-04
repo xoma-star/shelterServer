@@ -1,5 +1,5 @@
 import {WebSocketServer} from "ws";
-import {distresses, shelterLocations, shelterNames} from "./meta.js";
+import {distresses, genders, health, hobby, sex, shelterLocations, shelterNames} from "./meta.js";
 
 class Server {
     constructor() {
@@ -43,17 +43,28 @@ class Server {
     }
     startRoom(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
-        let willSurvive = Math.floor(room.players.length * room.willSurvivePercents / 100)
-        let distress = this.getRandomFromArray(distresses)
-        let shelterName = this.getRandomFromArray(shelterNames)
-        let shelterLocation = this.getRandomFromArray(shelterLocations)
-        this.broadcast(room.id, {distress, shelterName, shelterLocation, willSurvive})
+        room.willSurvive = Math.floor(room.players.length * room.willSurvivePercents / 100)
+        room.distress = this.getRandomFromArray(distresses)
+        room.shelterName = this.getRandomFromArray(shelterNames)
+        room.shelterLocation = this.getRandomFromArray(shelterLocations)
+        room.currentTurn = 0
+        for(let i = 0; i < room.players.length; i++){
+            room.players[i].stats = {
+                biologic: `${this.getRandomFromArray(sex)}, ${this.getRandomFromArray(genders)}, ${this.generateRandom(18, 100)} лет`,
+                health: this.getRandomFromArray(health),
+                hobby: this.getRandomFromArray(hobby)
+            }
+            room.players[i].revealed = []
+            room.players[i].abilities = []
+        }
+        this.broadcast(room.id, {type: 'roomStarted', data: room})
     }
     disconnectRoom(data){
         this.deletePlayerFromRoom(data.userId, data.roomId)
     }
     getRandomFromArray(array){
-        return array[this.generateRandom(0, array.length-1)]
+        let a = this.generateRandom(0, array.length)
+        return array[a]
     }
     deletePlayerFromRoom(id, roomId){
         let roomIndex = this.rooms.findIndex(x => x.id === roomId)
@@ -121,12 +132,12 @@ class Server {
     generateRoomNumber(){
         let num = 0
         for (let i = 0; i < 5; i++){
-            num += this.generateRandom(0, 9) * Math.pow(10, i)
+            num += this.generateRandom(0, 10) * Math.pow(10, i)
         }
         return Math.floor(num)
     }
     generateRandom(min, max){
-        return Math.random() * (max - min) + min
+        return Math.floor(Math.random() * (max - min) + min)
     }
 }
 
