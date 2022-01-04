@@ -58,6 +58,7 @@ class Server {
             room.players[i].abilities = []
         }
         this.broadcast(room.id, {type: 'roomStarted', data: room})
+        this.getClient(room.players[0].id).send(JSON.stringify({type: 'newTurn'}))
     }
     disconnectRoom(data){
         this.deletePlayerFromRoom(data.userId, data.roomId)
