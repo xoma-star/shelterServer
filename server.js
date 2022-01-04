@@ -1,5 +1,16 @@
 import {WebSocketServer} from "ws";
-import {distresses, genders, health, hobby, sex, shelterLocations, shelterNames} from "./meta.js";
+import {
+    additional,
+    character,
+    distresses, equipment,
+    genders,
+    health,
+    hobby,
+    phobia,
+    sex,
+    shelterLocations,
+    shelterNames
+} from "./meta.js";
 
 class Server {
     constructor() {
@@ -39,7 +50,21 @@ class Server {
             if(message.type === 'connectRoom') this.connectRoom(message.data)
             if(message.type === 'disconnectRoom') this.disconnectRoom(message.data)
             if(message.type === 'startRoom') this.startRoom(message.data)
+            if(message.type === 'didTurn') this.turnHandler(message.data)
         })
+    }
+    turnHandler(data){
+        let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        room.players[room.currentTurn].revealed.push(data.revealed)
+        room.currentTurn++
+        if(room.currentTurn >= room.players.length){
+            this.clients.find(x => x.id === room.players[0].id).send(JSON.stringify({type: 'turnEnded'}))
+        }
+        else{
+            this.clients.find(x => x.id === room.players[room.currentTurn].id).send(JSON.stringify({type: 'newTurn'}))
+        }
+        this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
+        this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
     }
     startRoom(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
@@ -52,7 +77,11 @@ class Server {
             room.players[i].stats = {
                 biologic: `${this.getRandomFromArray(sex)}, ${this.getRandomFromArray(genders)}, ${this.generateRandom(18, 100)} лет`,
                 health: this.getRandomFromArray(health),
-                hobby: this.getRandomFromArray(hobby)
+                hobby: this.getRandomFromArray(hobby),
+                character: this.getRandomFromArray(character),
+                phobia: this.getRandomFromArray(phobia),
+                additional: this.getRandomFromArray(additional),
+                equipment: this.getRandomFromArray(equipment)
             }
             room.players[i].revealed = []
             room.players[i].abilities = []
