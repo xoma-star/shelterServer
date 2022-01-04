@@ -55,13 +55,15 @@ class Server {
     }
     turnHandler(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        console.log(room)
         room.players[room.currentTurn].revealed.push(data.revealed)
         room.currentTurn++
         if(room.currentTurn >= room.players.length){
-            this.clients.find(x => x.id === room.players[0].id).send(JSON.stringify({type: 'turnEnded'}))
+            this.clients[room.players[0].id].send(JSON.stringify({type: 'turnEnded'}))
+            room.currentTurn = 0
         }
         else{
-            this.clients.find(x => x.id === room.players[room.currentTurn].id).send(JSON.stringify({type: 'newTurn'}))
+            this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'}))
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
@@ -72,6 +74,7 @@ class Server {
         room.distress = this.getRandomFromArray(distresses)
         room.shelterName = this.getRandomFromArray(shelterNames)
         room.shelterLocation = this.getRandomFromArray(shelterLocations)
+        room.waitingForPlayers = false
         room.currentTurn = 0
         for(let i = 0; i < room.players.length; i++){
             room.players[i].stats = {
@@ -86,6 +89,7 @@ class Server {
             room.players[i].revealed = []
             room.players[i].abilities = []
         }
+        this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(room.id, {type: 'roomStarted', data: room})
         this.getClient(room.players[0].id).send(JSON.stringify({type: 'newTurn'}))
     }
