@@ -52,7 +52,24 @@ class Server {
             if(message.type === 'startRoom') this.startRoom(message.data)
             if(message.type === 'didTurn') this.turnHandler(message.data)
             if(message.type === 'newTurn') this.newTurn(message.data)
+            if(message.type === 'kickPlayer') this.kickPlayer(message.data)
+            if(message.type === 'deleteRoom') this.deleteRoom(message.data)
         })
+    }
+    deleteRoom(data){
+        this.broadcast(data.roomId, {type: 'deleteRoom'})
+        this.rooms.splice(this.rooms.findIndex(x => x.id === data.roomId), 1)
+    }
+    kickPlayer(data){
+        let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        room.players[data.playerId].kicked = true
+        let d = room.players.filter(v => v.kicked === false)
+        if(d.length <= room.willSurvive){
+            this.broadcast(room.id, {type: 'gameEnded', data: {survived: d}})
+            return
+        }
+        this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
+        this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
     }
     newTurn(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
@@ -62,7 +79,13 @@ class Server {
     turnHandler(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
         room.players[room.currentTurn].revealed.push(data.revealed)
-        room.currentTurn++
+        while(true){
+            room.currentTurn++
+            if(room.currentTurn >= room.players.length){
+                break
+            }
+            if(!room.players[room.currentTurn].kicked) break
+        }
         if(room.currentTurn >= room.players.length){
             setTimeout(() => this.broadcast(room.id, {type: 'turnEnded'}), 500)
             room.currentTurn = 0
@@ -91,6 +114,7 @@ class Server {
                 additional: this.getRandomFromArray(additional),
                 equipment: this.getRandomFromArray(equipment)
             }
+            room.players[i].kicked = false
             room.players[i].revealed = []
             room.players[i].abilities = []
         }
@@ -107,10 +131,12 @@ class Server {
     }
     deletePlayerFromRoom(id, roomId){
         let roomIndex = this.rooms.findIndex(x => x.id === roomId)
-        let userIndex = this.rooms[roomIndex].players.findIndex(x => x.id === id)
-        if(roomIndex >= 0 && userIndex >= 0) this.rooms[roomIndex].players.splice(userIndex, 1)
-        if(this.rooms[roomIndex].players.length === 0) this.rooms.splice(roomIndex, 1)
-        else this.broadcast(roomId, {type: 'roomDataUpdated', data: this.rooms[roomIndex]}, id)
+        let userIndex = this.rooms[roomIndex]?.players?.findIndex(x => x.id === id)
+        if(roomIndex >= 0 && userIndex >= 0) this.rooms[roomIndex]?.players?.splice(userIndex, 1)
+        if(typeof this.rooms[roomIndex] !== 'undefined'){
+            if(this.rooms[roomIndex]?.players?.length === 0) this.rooms.splice(roomIndex, 1)
+            else this.broadcast(roomId, {type: 'roomDataUpdated', data: this.rooms[roomIndex]}, id)
+        }
         this.clients[id].roomId = -1
     }
     pushRoom(room){
@@ -118,9 +144,14 @@ class Server {
     }
     createRoom(data){
         let client = this.getClient(data.userData.id)
-        client.roomId = this.generateRoomNumber()
-        let room = this.generateRoom(data)
-        this.pushRoom(room)
+        let room
+        if(!data.roomData) {
+            client.roomId = this.generateRoomNumber()
+            room = this.generateRoom(data)
+            this.pushRoom(room)
+        }else{
+            room = this.rooms.find(x => x.id === data.roomData.id)
+        }
         client.send(JSON.stringify({
             type: 'createdRoom',
             data: room
@@ -155,7 +186,8 @@ class Server {
             }
         })
     }
-    generateRoom(data){
+    generateRoom(data, rewrite = false){
+        if(rewrite) console.log('a')
         let client = this.getClient(data.userData.id)
         return {
             id: client.roomId,
