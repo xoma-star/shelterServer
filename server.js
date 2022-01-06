@@ -51,19 +51,24 @@ class Server {
             if(message.type === 'disconnectRoom') this.disconnectRoom(message.data)
             if(message.type === 'startRoom') this.startRoom(message.data)
             if(message.type === 'didTurn') this.turnHandler(message.data)
+            if(message.type === 'newTurn') this.newTurn(message.data)
         })
+    }
+    newTurn(data){
+        let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        this.broadcast(room.id, {type: 'didBriefing'})
+        this.getClient(room.players[0].id).send(JSON.stringify({type: 'newTurn'}))
     }
     turnHandler(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
-        console.log(room)
         room.players[room.currentTurn].revealed.push(data.revealed)
         room.currentTurn++
         if(room.currentTurn >= room.players.length){
-            this.clients[room.players[0].id].send(JSON.stringify({type: 'turnEnded'}))
+            setTimeout(() => this.broadcast(room.id, {type: 'turnEnded'}), 500)
             room.currentTurn = 0
         }
         else{
-            this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'}))
+            setTimeout(() => this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'})), 500)
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
