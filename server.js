@@ -6,10 +6,10 @@ import {
     genders,
     health,
     hobby,
-    phobia,
+    phobia, roomConditions,
     sex,
     shelterLocations,
-    shelterNames
+    shelterNames, shelterResources, shelterRooms, shelterRoomsIcons
 } from "./meta.js";
 
 class Server {
@@ -107,6 +107,19 @@ class Server {
         room.distress = this.getRandomFromArray(distresses)
         room.shelterName = this.getRandomFromArray(shelterNames)
         room.shelterLocation = this.getRandomFromArray(shelterLocations)
+        room.foods = this.getRandomFromArray(shelterResources)
+        room.duration = this.generateRandom(3,36)
+        room.rooms = []
+        for(let i = 0; i < this.generateRandom(4, shelterRooms.length - 1); i++) {
+            let a
+            while(true){
+                a = this.generateRandom(0, shelterRooms.length)
+                if(room.rooms.findIndex(x => x.name === shelterRooms[a]) < 0){
+                    room.rooms.push({name: shelterRooms[a], condition: this.getRandomFromArray(roomConditions), icon: shelterRoomsIcons[a]})
+                    break
+                }
+            }
+        }
         room.waitingForPlayers = false
         room.currentTurn = 0
         for(let i = 0; i < room.players.length; i++){
