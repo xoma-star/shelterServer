@@ -54,7 +54,12 @@ class Server {
             if(message.type === 'newTurn') this.newTurn(message.data)
             if(message.type === 'kickPlayer') this.kickPlayer(message.data)
             if(message.type === 'deleteRoom') this.deleteRoom(message.data)
+            if(message.type === 'startConfirm') this.startConfirm(message.data)
         })
+    }
+    startConfirm(data){
+        let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        this.getClient(room.players[0].id).send(JSON.stringify({type: 'newTurn'}))
     }
     deleteRoom(data){
         this.broadcast(data.roomId, {type: 'deleteRoom'})
@@ -87,11 +92,11 @@ class Server {
             if(!room.players[room.currentTurn].kicked) break
         }
         if(room.currentTurn >= room.players.length){
-            setTimeout(() => this.broadcast(room.id, {type: 'turnEnded'}), 500)
+            setTimeout(() => this.broadcast(room.id, {type: 'turnEnded'}), 0)
             room.currentTurn = 0
         }
         else{
-            setTimeout(() => this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'})), 500)
+            setTimeout(() => this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'})), 0)
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
@@ -120,7 +125,6 @@ class Server {
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(room.id, {type: 'roomStarted', data: room})
-        this.getClient(room.players[0].id).send(JSON.stringify({type: 'newTurn'}))
     }
     disconnectRoom(data){
         this.deletePlayerFromRoom(data.userId, data.roomId)
