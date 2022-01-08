@@ -21,13 +21,13 @@ class Server {
             let clientId
             console.log(req.url)
             let url = new URL('wss://shelter-heroku.com'+req.url)
-            if(url.searchParams?.get('type') === 'reconnect') clientId = url.searchParams.get('userId')
+            if(url.searchParams?.get('type') === 'reconnect') clientId = Number(url.searchParams.get('userId'))
             else clientId = this.generateRoomNumber()
+            let roomId = this.clients[clientId].roomId
             this.clients[clientId] = ws
             this.clients[clientId].id = clientId
-            if(url.searchParams?.get('type') !== 'reconnect') {
-                this.clients[clientId].roomId = -1
-            }
+            if(url.searchParams?.get('type') !== 'reconnect') this.clients[clientId].roomId = -1
+            else this.clients[clientId].roomId = roomId
             this.clients[clientId].send(JSON.stringify({
                 type: 'connected',
                 data: {
