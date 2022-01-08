@@ -1,6 +1,6 @@
 import {WebSocketServer} from "ws";
 import {
-    additional,
+    additional, cards,
     character,
     distresses, equipment,
     genders,
@@ -136,6 +136,14 @@ class Server {
             room.players[i].kicked = false
             room.players[i].revealed = []
             room.players[i].abilities = []
+            room.players[i].cards = []
+            while(true){
+                if(room.players[i].cards.length >= 2){
+                    break
+                }
+                let a = this.getRandomFromArray(cards)
+                if(room.players[i].cards.findIndex(x => x.data.description === a.description) < 0) room.players[i].cards.push(a)
+            }
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(room.id, {type: 'roomStarted', data: room})

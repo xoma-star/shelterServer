@@ -298,3 +298,14 @@ export const professions = [
     'пианист',
     'боец спецподразделения'
 ]
+
+export const cards = [
+    {type: 'reveal', data: {reveal: 'health', description: 'Раскройте здоровье любого игрока'}},
+    {type: 'reveal', data: {reveal: 'equipment', description: 'Раскройте снаряжение любого игрока'}},
+    {type: 'reveal', data: {reveal: 'biologic', description: 'Раскройте биологические характеристики любого игрока'}},
+    {type: 'swap', data: {swap: 'health', description: 'Обменяйтесь здоровьем с любым игроком'}},
+    {type: 'swap', data: {swap: 'equipment', description: 'Обменяйтесь снаряжением с любым игроком'}},
+    {type: 'destroy', data: {destroy: 'equipment',description: 'Уничтожает снаряжение любого игрока'}},
+    {type: 'knowledge', data: {knowledge: 'bunker+1place', description: 'Вы знаете, что в бункере хватит места еще на одного человека'}},
+    {type: 'knowledge', data: {knowledge: 'bunker-1place', description: 'Вы знаете, что в бункере не хватит запасов на всех (-1 место)'}}
+]
