@@ -6,7 +6,7 @@ import {
     genders,
     health,
     hobby,
-    phobia, roomConditions,
+    phobia, professions, roomConditions,
     sex,
     shelterLocations,
     shelterNames, shelterResources, shelterRooms, shelterRoomsIcons
@@ -124,6 +124,7 @@ class Server {
         room.currentTurn = 0
         for(let i = 0; i < room.players.length; i++){
             room.players[i].stats = {
+                profession: this.getRandomFromArray(professions),
                 biologic: `${this.getRandomFromArray(sex)}, ${this.getRandomFromArray(genders)}, ${this.generateRandom(18, 100)} лет`,
                 health: this.getRandomFromArray(health),
                 hobby: this.getRandomFromArray(hobby),
