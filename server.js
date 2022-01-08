@@ -18,11 +18,14 @@ class Server {
         this.server = new WebSocketServer({port: port})
         this.clients = {}
         this.server.on('connection', (ws, req) => {
-            console.log(req)
-            let clientId = this.generateRoomNumber()
+            let clientId
+            if(req.url.searchParams('type') === 'reconnect') clientId = Number(req.url.searchParams('userId'))
+            else clientId = this.generateRoomNumber()
             this.clients[clientId] = ws
-            this.clients[clientId].id = clientId
-            this.clients[clientId].roomId = -1
+            if(req.url.searchParams('type') !== 'reconnect') {
+                this.clients[clientId].id = clientId
+                this.clients[clientId].roomId = -1
+            }
             this.clients[clientId].send(JSON.stringify({
                 type: 'connected',
                 data: {
@@ -39,9 +42,9 @@ class Server {
     }
     disconnectHandler(id){
         this.getClient(id).on('close', () => {
-            let client = this.clients[id]
-            if(client.roomId >= 0) this.disconnectRoom({userId: client.id, roomId: client.roomId})
-            delete this.clients[id]
+            //let client = this.clients[id]
+            //if(client.roomId >= 0) this.disconnectRoom({userId: client.id, roomId: client.roomId})
+            // delete this.clients[id]
         })
     }
     messageHandler(id){
