@@ -55,7 +55,43 @@ class Server {
             if(message.type === 'kickPlayer') this.kickPlayer(message.data)
             if(message.type === 'deleteRoom') this.deleteRoom(message.data)
             if(message.type === 'startConfirm') this.startConfirm(message.data)
+            if(message.type === 'useCard') this.useCard(message.data)
         })
+    }
+    useCard(data){
+        let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        let card = room.players[data.playerId].cards[data.cardId]
+        switch (card.type){
+            case 'reveal':
+                try{
+                    room.players[data.inputVal].revealed.push(card.data.reveal)
+                }
+                catch (e){}
+                break
+            case 'swap':
+                try {
+                    let a = room.players[data.inputVal].stats[card.data.swap] + ""
+                    room.players[data.inputVal].stats[card.data.swap] = room.players[data.playerId].stats[card.data.swap] + ""
+                    room.players[data.playerId].stats[card.data.swap] = a
+                }catch (e) {}
+                break
+            case 'destroy':
+                room.players[data.inputVal].stats[card.data.destroy] = 'уничтожено'
+                break
+            case 'knowledge':
+                switch (card.data.knowledge) {
+                    case 'bunker+1place':
+                        room.willSurvive++
+                        break
+                    case 'bunker-1place':
+                        room.willSurvive--
+                        break
+                }
+                break
+        }
+        room.players[data.playerId].cards[data.cardId].used = true
+        this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
+        this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
     }
     startConfirm(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
