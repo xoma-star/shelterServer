@@ -26,7 +26,7 @@ class Server {
             this.clients[clientId] = ws
             this.clients[clientId].id = clientId
             if(url.searchParams?.get('type') !== 'reconnect') this.clients[clientId].roomId = -1
-            else this.clients[clientId].roomId = url.searchParams?.get('roomId')
+            else this.clients[clientId].roomId = Number(url.searchParams?.get('roomId'))
             this.clients[clientId].send(JSON.stringify({
                 type: 'connected',
                 data: {
