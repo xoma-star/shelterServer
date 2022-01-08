@@ -51,8 +51,8 @@ class Server {
     }
     messageHandler(id){
         this.clients[id].on('message', m => {
-            console.log('new message: ', id, m)
             let message = JSON.parse(m)
+            console.log('new message: ', id, message)
             if(message.type === 'createRoom') this.createRoom(message.data)
             if(message.type === 'connectRoom') this.connectRoom(message.data)
             if(message.type === 'disconnectRoom') this.disconnectRoom(message.data)
@@ -191,6 +191,7 @@ class Server {
             }
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
+        console.log('room started', room)
         this.broadcast(room.id, {type: 'roomStarted', data: room})
     }
     disconnectRoom(data){
