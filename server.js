@@ -150,7 +150,7 @@ class Server {
             room.currentTurn = 0
         }
         else{
-            setTimeout(() => this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'})), 0)
+            setTimeout(() => this.clients[room.players[room.currentTurn].id].send(JSON.stringify({type: 'newTurn'})), 500)
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(data.roomId, {type: 'roomDataUpdated', data: room})
