@@ -142,7 +142,8 @@ class Server {
                     break
                 }
                 let a = this.getRandomFromArray(cards)
-                if(room.players[i].cards.findIndex(x => x.data.description === a.description) < 0) room.players[i].cards.push(a)
+                a.used = false
+                if(room.players[i].cards.findIndex(x => x.data.description === a.data.description) < 0) room.players[i].cards.push(a)
             }
         }
         this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
