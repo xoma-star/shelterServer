@@ -21,7 +21,7 @@ class Server {
             let clientId
             console.log(req.url)
             let url = new URL('wss://shelter-heroku.com'+req.url)
-            if(url.searchParams?.get('type') === 'reconnect') clientId = Number(url.searchParams.get('userId'))
+            if(url.searchParams?.get('type') === 'reconnect') clientId = url.searchParams.get('userId')
             else clientId = this.generateRoomNumber()
             this.clients[clientId] = ws
             this.clients[clientId].id = clientId
@@ -254,6 +254,7 @@ class Server {
     broadcast(roomId, sendInfo, exception = -1){
         this.server.clients.forEach(v => {
             if(v.roomId === roomId && v.id !== exception){
+                console.log('sent data to '+v.id, sendInfo)
                 v.send(JSON.stringify(sendInfo), {binary: false})
             }
         })
