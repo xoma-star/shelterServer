@@ -33,6 +33,14 @@ class Server {
                     id: clientId
                 }
             }))
+            if(url.searchParams?.get('type') === 'reconnect'){
+                if(this.clients[clientId].roomId > 0){
+                    let room = Object.assign({}, this.rooms.find(x => x.id === this.clients[clientId].roomId))
+                    if(room.players.findIndex(x => x.id === clientId) === room.currentTurn) this.clients[clientId].send(JSON.stringify({
+                        type: 'newTurn'
+                    }))
+                }
+            }
             this.messageHandler(clientId)
             this.disconnectHandler(clientId)
         })
