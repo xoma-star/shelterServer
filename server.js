@@ -36,7 +36,7 @@ class Server {
             if(url.searchParams?.get('type') === 'reconnect'){
                 if(this.clients[clientId].roomId > 0){
                     let room = Object.assign({}, this.rooms.find(x => x.id === this.clients[clientId].roomId))
-                    if(room.players.findIndex(x => x.id === clientId) === room.currentTurn) this.clients[clientId].send(JSON.stringify({
+                    if(room.players.findIndex(x => x.id === clientId) === room.currentTurn && !room.briefing) this.clients[clientId].send(JSON.stringify({
                         type: 'newTurn'
                     }))
                 }
@@ -129,6 +129,8 @@ class Server {
     }
     newTurn(data){
         let room = Object.assign({}, this.rooms.find(x => x.id === data.roomId))
+        room.briefing = false
+        this.rooms[this.rooms.findIndex(x => x.id === data.roomId)] = room
         this.broadcast(room.id, {type: 'didBriefing'})
         this.getClient(room.players[0].id).send(JSON.stringify({type: 'newTurn'}))
     }
@@ -144,6 +146,7 @@ class Server {
         }
         if(room.currentTurn >= room.players.length){
             setTimeout(() => this.broadcast(room.id, {type: 'turnEnded'}), 0)
+            room.briefing = true
             room.currentTurn = 0
         }
         else{
