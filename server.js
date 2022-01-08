@@ -51,6 +51,7 @@ class Server {
     }
     messageHandler(id){
         this.clients[id].on('message', m => {
+            console.log('new message: ', id, m)
             let message = JSON.parse(m)
             if(message.type === 'createRoom') this.createRoom(message.data)
             if(message.type === 'connectRoom') this.connectRoom(message.data)
