@@ -19,10 +19,11 @@ class Server {
         this.clients = {}
         this.server.on('connection', (ws, req) => {
             let clientId
-            if(req.url.searchParams.get('type') === 'reconnect') clientId = Number(req.url.searchParams.get('userId'))
+            console.log(req.url)
+            if(req?.url?.searchParams?.get('type') === 'reconnect') clientId = Number(req.url.searchParams.get('userId'))
             else clientId = this.generateRoomNumber()
             this.clients[clientId] = ws
-            if(req.url.searchParams.get('type') !== 'reconnect') {
+            if(req?.url?.searchParams?.get('type') !== 'reconnect') {
                 this.clients[clientId].id = clientId
                 this.clients[clientId].roomId = -1
             }
