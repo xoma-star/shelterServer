@@ -57,7 +57,7 @@ class Server {
             if(message.type === 'deleteRoom') this.deleteRoom(message.data)
             if(message.type === 'startConfirm') this.startConfirm(message.data)
             if(message.type === 'useCard') this.useCard(message.data)
-            if(message.ping === 'pong') this.clients[id].send(JSON.stringify({pong: ping}))
+            if(message.ping === 'pong') this.clients[id].send(JSON.stringify({pong: 'ping'}))
         })
     }
     useCard(data){
