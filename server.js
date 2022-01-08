@@ -46,7 +46,7 @@ class Server {
         this.getClient(id).on('close', () => {
             //let client = this.clients[id]
             //if(client.roomId >= 0) this.disconnectRoom({userId: client.id, roomId: client.roomId})
-            // delete this.clients[id]
+            delete this.clients[id]
         })
     }
     messageHandler(id){
