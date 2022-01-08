@@ -17,7 +17,8 @@ class Server {
         let port = process.env.PORT || 5500
         this.server = new WebSocketServer({port: port})
         this.clients = {}
-        this.server.on('connection', ws => {
+        this.server.on('connection', (ws, req) => {
+            console.log(req)
             let clientId = this.generateRoomNumber()
             this.clients[clientId] = ws
             this.clients[clientId].id = clientId
@@ -56,6 +57,7 @@ class Server {
             if(message.type === 'deleteRoom') this.deleteRoom(message.data)
             if(message.type === 'startConfirm') this.startConfirm(message.data)
             if(message.type === 'useCard') this.useCard(message.data)
+            if(message.ping === 'pong') this.clients[id].send(JSON.stringify({pong: ping}))
         })
     }
     useCard(data){
